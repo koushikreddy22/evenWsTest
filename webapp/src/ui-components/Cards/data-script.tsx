@@ -1,8 +1,6 @@
-import React, { useRef, useState } from "react";
-import { Box, Button, TextField, Typography } from "@mui/material";
+import React, {  useState } from "react";
+import { Box, TextField, Typography } from "@mui/material";
 import CardHeader from "../common/cardHeader";
-import AddPackages from "../dialog-boxes/add-packages";
-import { AddPackageDialogRef } from "../dialog-boxes/add-packages";
 import { getValueByPath } from "./configCard";
 import { useTestConfigStore } from "../../store/app-store";
 interface DataScriptsProps {
@@ -33,8 +31,7 @@ const DataScripts: React.FC<DataScriptsProps> = ({ serverConfig }) => {
         <Box sx={{ flexGrow: 1, margin: "15px", border: "1px solid #DFE3EB", borderRadius: "8px" }}>
             <CardHeader header={header} />
             <Box sx={{ display: "flex" }}>
-                {fields.map((field) => {
-                    console.log(field)
+                {fields.map((field,index) => {
                     const value = getValueByPath(testConfig, field.path, field.name)
                     return (
                         <Box sx={{ textAlign: "left", width: field.width || "50%", border: "1px solid #DFE3EB" }}>
@@ -58,8 +55,8 @@ const DataScripts: React.FC<DataScriptsProps> = ({ serverConfig }) => {
                             <Box sx={{ padding: "10px", borderTop: "1px solid #DFE3EB", textAlign: "start" }}>
                                 <Typography>{"Timeout (in seconds)"}{<input
                                     type="number"
-                                    value={timer}
-                                    // onChange={handleChange}
+                                    value={index===0 ?testConfig.dataScript.initTimeout : testConfig.dataScript.cleanUpTimeout}
+                                    onChange={(e)=>{onFieldChange(e.target.value,field.path,index===0 ?"initTimeout":"cleanUpTimeout")}}
                                     min={0}
                                     max={999}
                                     style={{

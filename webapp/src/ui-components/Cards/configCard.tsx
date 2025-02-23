@@ -5,6 +5,7 @@ import UploadDialog, { UploadDialogRef } from "../dialog-boxes/upload-dialog-box
 import MessageEditBox from "../common/messageEditBox";
 import { useTestConfigStore } from "../../store/app-store";
 import { TestConfig } from "../../store/types";
+import ConsumedBy from "../Contents/consumedBy";
 
 interface ConfigCardProps {
   serverConfig: {
@@ -18,7 +19,7 @@ interface ConfigCardProps {
       columns?: { placeholder: string; name: string }[];
       path: string;
       name: string;
-      dataType?:string
+      dataType?: string
     }[];
   };
 }
@@ -54,7 +55,7 @@ const TableComponent = ({ columns, list }: { columns: { placeholder: string; nam
   const handleChange = (index: number, field: string, value: string) => {
     const updatedRows = [...list];
     updatedRows[index][field] = value;
-    onFieldChange(value,"", "servers")
+    onFieldChange(value, "", "servers")
   };
 
 
@@ -94,11 +95,10 @@ const TableComponent = ({ columns, list }: { columns: { placeholder: string; nam
   );
 };
 
-const ConfigCard: React.FC<ConfigCardProps> = ({ serverConfig }) => {
+const ConfigCard: React.FC<ConfigCardProps> = ({ serverConfig, caseIndex }) => {
   const { header, fields } = serverConfig;
-  const { testConfig,onFieldChange } = useTestConfigStore()
-  console.log(testConfig)
-  
+  const { testConfig, onFieldChange } = useTestConfigStore()
+
 
   const uploadDialogRef = useRef<UploadDialogRef>(null);
 
@@ -114,8 +114,21 @@ const ConfigCard: React.FC<ConfigCardProps> = ({ serverConfig }) => {
               </Typography>
               {(() => {
                 const value = getValueByPath(testConfig, field?.path, field.name)
-
                 switch (field.type) {
+                  case "servers":
+                    const serverOptions = testConfig.servers?.map((server) => server.name) ?? [];
+
+                    return (
+                      <Autocomplete
+                        options={serverOptions}
+                        value={value || null} // Ensure value is controlled
+                        onChange={(event, newValue) => onFieldChange(newValue, field.path, field.name)} // Corrected onChange
+                        renderInput={(params) => <TextField {...params} variant="standard"  />}
+                      />
+                    );
+
+                  case "consumedBy":
+                    return <ConsumedBy index={caseIndex} />;
                   case "script":
                     return <TextField variant="standard" value={value} placeholder={field.placeholder} fullWidth multiline minRows={20} sx={{
                       "& .MuiOutlinedInput-root": {
@@ -139,11 +152,11 @@ const ConfigCard: React.FC<ConfigCardProps> = ({ serverConfig }) => {
                       />
                     );
                   case "messageBox":
-                    return <MessageEditBox/>
+                    return <MessageEditBox index={caseIndex} value={value} />
                   case "textField":
                     return <TextField fullWidth variant="standard"
-                    datatype={field.dataType || "string"}
-                    onChange={(e) => onFieldChange(e.target.value, field.path, field.name)}
+                      datatype={field.dataType || "string"}
+                      onChange={(e) => onFieldChange(e.target.value, field.path, field.name)}
                       value={value}
                     />;
                   case "file":

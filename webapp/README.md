@@ -1,50 +1,130 @@
-# React + TypeScript + Vite
+# EvenWsTest
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D16-brightgreen)
+![TypeScript](https://img.shields.io/badge/typescript-%3E%3D4.7-blue)
 
-Currently, two official plugins are available:
+A TypeScript-based npm package and web application to run test cases for distributed WebSocket servers. This tool helps in load testing, connection stability checks, and real-time message validation across multiple WebSocket instances.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Overview
 
-## Expanding the ESLint configuration
+### Project Description and Purpose
+EvenWsTest is designed to facilitate the testing of distributed WebSocket servers. It allows users to simulate multiple WebSocket clients, send and receive messages in real-time, and validate server responses. The project includes both a backend npm package and a frontend web application for managing and running test configurations.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+### Key Features and Functionality
+- Simulate multiple WebSocket clients.
+- Send and receive messages in real-time.
+- Validate server responses.
+- Support for distributed WebSocket environments.
+- Customizable test scripts.
+- Detailed logs and metrics.
+- Web interface for creating and managing test configurations.
 
-- Configure the top-level `parserOptions` property like this:
+## Installation
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+### Prerequisites and Dependencies
+- Node.js >= 16
+- TypeScript >= 4.7
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+### Installation Steps
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+#### Backend (npm package)
+1. Clone the repository:
+    ```sh
+    git clone https://github.com/evenopensource/distributed-websocket-testing.git
+    cd distributed-websocket-testing/package
+    ```
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+2. Install dependencies:
+    ```sh
+    npm install
+    ```
+
+3. Build the project:
+    ```sh
+    npm run build
+    ```
+
+#### Frontend (web application)
+1. Navigate to the webapp directory:
+    ```sh
+    cd ../webapp
+    ```
+
+2. Install dependencies:
+    ```sh
+    npm install
+    ```
+
+3. Start the development server:
+    ```sh
+    npm run dev
+    ```
+
+## Usage
+
+### Backend (npm package)
+1. Import the package and use it in your project:
+    ```ts
+    import { EvenWsTest } from 'even';
+
+    const testConfig = {
+        // Your test configuration
+    };
+
+    const testRunner = new EvenWsTest(testConfig);
+    testRunner.run((testResult) => {
+        console.log(testResult);
+    });
+    ```
+
+2. Run the tests:
+    ```sh
+    npm run dev
+    ```
+
+### Frontend (web application)
+1. Access the web application at `http://localhost:3000`.
+2. Use the interface to create and manage test configurations.
+3. Export the test configurations as JSON files.
+
+## Contributing
+
+### Guidelines for Contributing
+- Fork the repository.
+- Create a new branch for your feature or bugfix.
+- Commit your changes and push them to your fork.
+- Create a pull request with a detailed description of your changes.
+
+### Development Setup
+1. Clone the repository:
+    ```sh
+    git clone https://github.com/evenopensource/distributed-websocket-testing.git
+    cd distributed-websocket-testing
+    ```
+
+2. Install dependencies for both backend and frontend:
+    ```sh
+    cd package
+    npm install
+    cd ../webapp
+    npm install
+    ```
+
+3. Start the development servers:
+    ```sh
+    cd ../package
+    npm run dev
+    cd ../webapp
+    npm run dev
+    ```
+
+### Testing Instructions
+- Ensure all tests pass before submitting a pull request.
+- Write unit tests for new features and bug fixes.
+
+## License
+
+This project is licensed under the MIT License.
+
+## Authors

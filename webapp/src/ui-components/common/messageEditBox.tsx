@@ -1,17 +1,20 @@
 import React, { useState, useRef } from "react";
-import { Box, Button, Divider, IconButton, TextField } from "@mui/material";
+import { Box, Button, Divider, IconButton, TextField, Typography } from "@mui/material";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import SendIcon from "@mui/icons-material/Send";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import EditSquare from '../../assets/editSquare.svg';
+import { useTestConfigStore } from "../../store/app-store";
+import CodeDialog from "./codeBlock";
 
-const MessageEditBox: React.FC = () => {
+const MessageEditBox: React.FC = ({value, label, index, onChangeValue}:{value:string, label:string}) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [selectedTab, setSelectedTab] = useState<number | null>(null);
-    const [inputText, setInputText] = useState("");
-
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const {testConfig,onFieldChange} = useTestConfigStore()
+    const recommendationMessages = testConfig.message.recommendationMessages
     const scroll = (direction: "left" | "right") => {
         if (scrollRef.current) {
             const { scrollLeft, clientWidth } = scrollRef.current;
@@ -22,9 +25,28 @@ const MessageEditBox: React.FC = () => {
             });
         }
     };
+    const onSelectRecommendation = (message:string) => {
+        if(label){
+            onChangeValue(recommendationMessages[message])
+        }
+        onFieldChange(recommendationMessages[message], "testSuites.0.testCases." + index, "addUserMessage")
+    }
 
     return (
         <Box display="flex" flexDirection="column" gap={1} sx={{ width: "100%", border: "1px solid #DFE3EB", padding: "10px 10px" }}>
+            <Box>
+            <Typography variant="h6" >{label || "User Message"}</Typography>
+            </Box>
+            <Box display="flex" alignItems="center" gap={1}>
+                <TextField
+                    fullWidth
+                    variant="standard"
+                    placeholder="Start a new message..."
+                    value={JSON.stringify(value)}
+                    onChange={(e) => onChangeValue(e.target.value)}
+                    InputProps={{ disableUnderline: true }}
+                />
+            </Box>
             <Box display="flex" alignItems="center" gap={1}>
                 <IconButton onClick={() => scroll("left")}>
                     <ArrowBackIcon />
@@ -41,11 +63,11 @@ const MessageEditBox: React.FC = () => {
                         maxWidth: "100%",
                     }}
                 >
-                    {[...Array(7)].map((_, index) => (
+                    {Object.keys(recommendationMessages).map((key, index) => (
                         <Button
                             key={index}
                             variant={ "outlined"}
-                            onClick={() => setSelectedTab(index)}
+                            onClick={() => onSelectRecommendation(key)}
                             sx={{
                                 whiteSpace: "nowrap",
                                 textOverflow: "ellipsis",
@@ -54,8 +76,8 @@ const MessageEditBox: React.FC = () => {
                                 color:"#666E7D",
                                 borderColor: "#DFE3EB",
                             }}
-                        >
-                            Websocket request {index + 1}
+                        >{key}
+                           
                         </Button>
                     ))}
                 </Box>
@@ -67,24 +89,11 @@ const MessageEditBox: React.FC = () => {
                     sx={{ borderColor: "#DFE3EB", height: "24px", mx: 1 }}
                 />
 
-                <IconButton>
+                <IconButton onClick={() => setIsDialogOpen(true)}>
                     <img src={EditSquare} alt="Edit" />
                 </IconButton>
             </Box>
-            <Box display="flex" alignItems="center" gap={1}>
-                <TextField
-                    fullWidth
-                    variant="standard"
-                    placeholder="Start a new message..."
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    InputProps={{ disableUnderline: true }}
-                />
-
-                <IconButton color="primary" disabled={!inputText.trim()}>
-                    <SendIcon />
-                </IconButton>
-            </Box>
+            <CodeDialog value={JSON.stringify(value)} open={isDialogOpen} onChangeValue={onChangeValue} onClose={()=>{setIsDialogOpen(false)}}/>
         </Box>
     );
 };

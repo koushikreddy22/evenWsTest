@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { TestConfig } from "./types";
-
+import merge from "lodash/merge";
+import cloneDeep from "lodash/cloneDeep";
 
 const testConfig: TestConfig = {
   servers: [
@@ -66,22 +67,99 @@ const testConfig: TestConfig = {
       testCases: [
         {
           action: "addUser",
+          testDescription: "Adding SSN111 to server-1",
           testId: "100-1",
           userName: "SSN111",
           server: "server-1",
           consumedBy: [],
-          addUserMessage:{"action": "student_join","id": "SSN111","year": 3,"section": "A","department": "CS"},
-          timeOut:5
+          addUserMessage: { "action": "student_join", "id": "SSN111", "year": 3, "section": "A", "department": "CS" },
+          timeout: 5
         },
         {
           action: "addUser",
           testId: "100-2",
+          testDescription: "Adding SSN222 to server-1",
           userName: "SSN222",
           server: "server-1",
-          consumedBy: [{  users: ["SSN111"],message: {"action": "student_join","id": "SSN222","year": 3,"section": "A","department": "CS"}}],
-          addUserMessage:{"action": "student_join","id": "SSN222","year": 3,"section": "A","department": "CS"},
-          timeOut:5
-        }
+          consumedBy: [{ users: ["SSN111"], message: { "action": "student_join", "id": "SSN222", "year": 3, "section": "A", "department": "CS" } }],
+          addUserMessage: { "action": "student_join", "id": "SSN222", "year": 3, "section": "A", "department": "CS" },
+          timeout: 5
+        },
+        {
+          action: "sendMessage",
+          testId: "100-3",
+          testDescription: "Sending message from SSNProf111 to SSN111 and SSN222",
+          timeout: 5,
+          producedBy: {
+            name: "SSNProf111",
+            message: { "action": "professor_broadcast", "stuDepartment": "CS", "stuYear": 3, "stuSection": "A", "message": "hii this is prof SSNProf111" },
+          },
+          consumedBy: [
+            {
+              users: ["SSN111", "SSN222"],
+              message: { "action": "professor_broadcast", "stuDepartment": "CS", "stuYear": 3, "stuSection": "A", "message": "hii this is prof SSNProf111" },
+            },
+          ],
+        },
+        {
+          action: "removeUser",
+          testDescription: "Removing SSN111. This should be notified to SSN222",
+          testId: "100-4",
+          name: "SSN111",
+          timeout: 5,
+          consumedBy: [
+            {
+              users: ["SSN222"],
+              message: { "action": "student_leave", "id": "SSN111", "year": 3, "section": "A", "department": "CS" },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "Test suite 2",
+      description: "When a student is added/leaves other students should receive message.",
+      id: "100",
+      testCases: [
+        {
+          action: "addUser",
+          testDescription: "Adding SSN111 to server-1",
+          testId: "100-1",
+          userName: "SSN111",
+          server: "server-1",
+          consumedBy: [],
+          addUserMessage: { "action": "student_join", "id": "SSN111", "year": 3, "section": "A", "department": "CS" },
+          timeout: 5
+        },
+        {
+          action: "sendMessage",
+          testId: "100-3",
+          testDescription: "Sending message from SSNProf111 to SSN111 and SSN222",
+          timeout: 5,
+          producedBy: {
+            name: "SSNProf111",
+            message: { "action": "professor_broadcast", "stuDepartment": "CS", "stuYear": 3, "stuSection": "A", "message": "hii this is prof SSNProf111" },
+          },
+          consumedBy: [
+            {
+              users: ["SSN111", "SSN222"],
+              message: { "action": "professor_broadcast", "stuDepartment": "CS", "stuYear": 3, "stuSection": "A", "message": "hii this is prof SSNProf111" },
+            },
+          ],
+        },
+        {
+          action: "removeUser",
+          testDescription: "Removing SSN111. This should be notified to SSN222",
+          testId: "100-4",
+          name: "SSN111",
+          timeout: 5,
+          consumedBy: [
+            {
+              users: ["SSN222"],
+              message: { "action": "student_leave", "id": "SSN111", "year": 3, "section": "A", "department": "CS" },
+            },
+          ],
+        },
       ],
     }
   ],
@@ -91,31 +169,39 @@ const testConfig: TestConfig = {
     cleanUp: `sudo snap stop redis`,
     initTimeout: 5,
     cleanUpTimeout: 5
-  } 
+  }
 };
+
 interface TestConfigState {
   testConfig: TestConfig;
   updateTestConfig: (newConfig: Partial<TestConfig>) => void;
   onFieldChange: (value: any, path: string, key: string) => void;
+  clearTestSuites: () => void
+  selectedTestSuiteIndex: number | null;
+  setSelectedTestSuite: (index: number) => void;
 }
-
 
 export const useTestConfigStore = create<TestConfigState>((set) => ({
   testConfig: testConfig,
+
   updateTestConfig: (newConfig) =>
     set((state) => ({
-      testConfig: { ...state.testConfig, ...newConfig },
+      testConfig: merge({}, state.testConfig, newConfig), // Deep merge fix
     })),
-  
+
+  clearTestSuites: () =>
+    set((state) => ({
+      testConfig: { ...state.testConfig, testSuites: [], totalTestCases: 0 }, // Reset totalTestCases fix
+    })),
+
   onFieldChange: (value, path, key) => {
-    console.log(value, path, key);
     set((state) => {
-      const updatedConfig = { ...state.testConfig };
+      const updatedConfig = cloneDeep(state.testConfig); // Deep clone fix
       const keys = path.split(".");
       let current: any = updatedConfig;
 
       for (let i = 0; i < keys.length - 1; i++) {
-        if (!current[keys[i]]) current[keys[i]] = {}; // Ensure the path exists
+        if (!current[keys[i]]) current[keys[i]] = {};
         current = current[keys[i]];
       }
 
@@ -124,7 +210,6 @@ export const useTestConfigStore = create<TestConfigState>((set) => ({
       if (key === "length" && Array.isArray(current[lastKey])) {
         let arr = current[lastKey];
         value = parseInt(value || 0, 10);
-
         if (arr.length < value) {
           while (arr.length < value) {
             arr.push({ server: "", port: "" });
@@ -143,6 +228,10 @@ export const useTestConfigStore = create<TestConfigState>((set) => ({
       return { testConfig: updatedConfig };
     });
   },
+
+  selectedTestSuiteIndex: 0, // Fix: Proper state key
+  setSelectedTestSuite: (index) => set({ selectedTestSuiteIndex: index }), // Fix: Update correct state key
 }));
+
 
 

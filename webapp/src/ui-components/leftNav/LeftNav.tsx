@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { TextField, InputAdornment, List, ListItem, ListItemText, Typography, Box, Card, Divider, Button, IconButton, styled, alpha } from '@mui/material';
+import { TextField, InputAdornment, List, ListItem, ListItemText, Typography, Box, Divider, IconButton, styled, alpha } from '@mui/material';
 import FolderOutlinedIcon from '@mui/icons-material/FolderOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import './LeftNav.css';
-import { FileUploadOutlined, KeyboardArrowDown, KeyboardArrowDownSharp, KeyboardArrowUpSharp, MoreHoriz, PlusOneOutlined } from '@mui/icons-material';
+import { FileUploadOutlined, KeyboardArrowDownSharp, KeyboardArrowUpSharp, MoreHoriz } from '@mui/icons-material';
 import MenuItem from '@mui/material/MenuItem';
 import Menu, { MenuProps } from '@mui/material/Menu';
 import EditIcon from '@mui/icons-material/Edit';
@@ -11,17 +11,19 @@ import trashIcon from '../../assets/trash.svg'
 import AddIcon from '@mui/icons-material/Add';
 import evenIcon from '../../assets/evenLogo.svg';
 import backwardIcon from '../../assets/backwardIcon.svg';
+import { useTestConfigStore } from '../../store/app-store';
 
 
 
-interface Port {
+interface Case {
   number: number;
   name: string;
+  label: string;
 }
 
 interface NavItem {
-  fileName: string;
-  ports: Port[];
+  name: string;
+  cases: Case[];
 }
 
 interface LeftNavProps {
@@ -75,9 +77,9 @@ const StyledMenu = styled((props: MenuProps) => (
 
 const LeftNav: React.FC<LeftNavProps> = ({ items }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [menuAnchorEl, setMenuAnchorEl] = React.useState<null | HTMLElement>(null);
+  const { selectedTestSuiteIndex, setSelectedTestSuite } = useTestConfigStore()
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -99,10 +101,10 @@ const LeftNav: React.FC<LeftNavProps> = ({ items }) => {
   };
 
   const filteredItems = items.filter((item) =>
-    item.fileName.toLowerCase().includes(searchTerm.toLowerCase())
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const handleTextFieldClick = (index: number) => {
-    setSelectedIndex(index === selectedIndex ? null : index); // Toggle visibility for the selected item
+    setSelectedTestSuite(index === selectedTestSuiteIndex ? null : index);
   };
   return (
     <div className="left-nav" style={{ backgroundColor: "#F5F5F566" }}>
@@ -128,7 +130,6 @@ const LeftNav: React.FC<LeftNavProps> = ({ items }) => {
             <Typography variant="caption" sx={{ color: "black", fontSize: "12px", fontWeight: 600 }}>
               Even
             </Typography>
-            <KeyboardArrowDown fontSize="small" />
           </IconButton>
         </Box>
 
@@ -185,7 +186,7 @@ const LeftNav: React.FC<LeftNavProps> = ({ items }) => {
 
 
       <Typography variant="h6" gutterBottom sx={{ color: "#666E7D", fontSize: "12px" }}>
-        Mockserver
+        Test Suites
       </Typography>
       {/* Navigation List */}
       <List>
@@ -195,7 +196,7 @@ const LeftNav: React.FC<LeftNavProps> = ({ items }) => {
               variant="standard"
               fullWidth
               size="small"
-              value={item.fileName || "Untitled"}
+              value={item.name || "Untitled"}
               onClick={() => handleTextFieldClick(index)}
               InputProps={{
                 startAdornment: (
@@ -205,7 +206,7 @@ const LeftNav: React.FC<LeftNavProps> = ({ items }) => {
                 ),
                 endAdornment: (
                   <InputAdornment position="end">
-                    {selectedIndex === index ? <KeyboardArrowUpSharp /> : <KeyboardArrowDownSharp />}
+                    {selectedTestSuiteIndex === index ? <KeyboardArrowUpSharp /> : <KeyboardArrowDownSharp />}
                   </InputAdornment>
                 ),
               }}
@@ -227,10 +228,11 @@ const LeftNav: React.FC<LeftNavProps> = ({ items }) => {
                 },
               }}
             />
-            {selectedIndex === index && (
+            {selectedTestSuiteIndex === index && (
               <Box sx={{ marginTop: 1, width: "100%", paddingLeft: "30px" }}>
-                {item.ports.map((port, idx) => (
-                  <Box sx={{
+                {item.cases.map((caseItem, idx) => {
+                  console.log(caseItem)
+                 return( <Box sx={{
                     display: "flex", justifyContent: "space-between",
                     alignItems: "center", cursor: "pointer",
                     "&:hover": {
@@ -241,16 +243,15 @@ const LeftNav: React.FC<LeftNavProps> = ({ items }) => {
                       key={idx}
                       variant="body1"
                       sx={{
-                        color: "#333",
+                        color: "#2160EB",
                         display: "flex",
                         padding: "5px",
-                        // backgroundColor:"red",
+                        backgroundColor:"#F2F4FF",
                         // justifyContent: "space-around",
                         gap: "16px" // Adjust the value as needed for the desired spacing
                       }}
                     >
-                      <span style={{ color: "#2160EB", fontSize: "12px", fontWeight: "500" }}>Port No: {port.number}</span>
-                      <span style={{ color: "#666E7D", fontSize: "12px", fontWeight: "500" }}>{port.name}</span>
+                      {caseItem.label}
                     </Typography>
                     <IconButton
                       id="composition-button"
@@ -288,7 +289,7 @@ const LeftNav: React.FC<LeftNavProps> = ({ items }) => {
                       </MenuItem>
                     </StyledMenu>
                   </Box>
-                ))}
+                )})}
               </Box>
             )}
             <Divider orientation="horizontal" flexItem sx={{ mx: 1, marginTop: "10px" }} />

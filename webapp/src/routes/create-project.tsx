@@ -1,8 +1,8 @@
 import { Box, Button, IconButton, Typography } from "@mui/material";
 import Content from "../ui-components/Contents/Content"
 import evenIcon from "../assets/evenLogo.svg"
-import { KeyboardArrowDown } from "@mui/icons-material";
 import { Link } from "react-router-dom";
+import { useTestConfigStore } from "../store/app-store";
 
 interface Field {
     name: string;
@@ -59,26 +59,35 @@ const MockserverConfig: ServerConfig[] = [
         header: "Server configuration",
         fields: [
             {
-                name: "length",
-                label: "No of websocket servers to start",
-                placeholder: "Enter No of websocket servers to start",
-                width: 5.3,
-                path:"servers",
+                name: "serverBootTime",
+                label: "server boot time",
+                placeholder: "Enter server boot time",
+                width: 8,
+                path:"repo",
                 dataType:"number",
                 type: "textField",
             },
             {
                 name: "path",
                 label: "Project path",
-                width: 5.3,
+                width: 8,
                 path:"repo",
                 placeholder: "Enter Project path",
                 type: "textField"
             },
             {
+                name: "length",
+                label: "No of websocket servers to start",
+                placeholder: "Enter No of websocket servers to start",
+                width: 8,
+                path:"servers",
+                dataType:"number",
+                type: "textField",
+            },
+            {
                 name: "startCommand",
                 label: "Start command",
-                width: 5.3,
+                width: 8,
                 path:"repo",
                 placeholder: "Enter Start command",
                 type: "textField"
@@ -87,7 +96,7 @@ const MockserverConfig: ServerConfig[] = [
                 name: "servers",
                 label: "Server Details",
                 type: "table",
-                width: 5.3,
+                width: 8,
                 placeholder: "Table data", // Added placeholder to fix TypeScript error
                 columns: [
                     { placeholder: "Server Name", name: "name" },
@@ -169,6 +178,7 @@ const MockserverConfig: ServerConfig[] = [
 ];
 
 export default function CreatePage() {
+    const { clearTestSuites } = useTestConfigStore()
     return (
         <Box >
             <Box sx={{ borderBottom: "1px solid #DFE3EB", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 25px 10px 35px" }}>
@@ -218,7 +228,7 @@ export default function CreatePage() {
             >
                 <Box>
                     <Link to="/add-test-cases">
-                        <Button sx={{ marginLeft: "20px" }} variant="contained" color="secondary">
+                        <Button sx={{ marginLeft: "20px" }} onClick={clearTestSuites} variant="contained" color="secondary">
                             Create New tests
                         </Button>
                     </Link>
