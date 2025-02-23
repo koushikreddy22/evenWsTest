@@ -3,6 +3,7 @@ import ConfigCard from '../Cards/configCard';
 import MessageProcessors from '../Cards/processor';
 import ConfigCard2 from '../Cards/configCard2';
 import DataScripts from '../Cards/data-script';
+import { useTestConfigStore } from '../../store/app-store';
 
 interface Field {
   name: string;
@@ -24,6 +25,8 @@ interface ContentProps {
 }
 
 const Content: React.FC<ContentProps> = ({ serverConfig }) => {
+
+
   return (
     <div>
       {serverConfig.map((config, index) => {
@@ -43,7 +46,7 @@ const Content: React.FC<ContentProps> = ({ serverConfig }) => {
           case 'messageProcessor':
             return (
               <div key={index} >
-                <MessageProcessors serverConfig={{ header: config.header, fields: config.fields || [] }} />
+                <MessageProcessors serverConfig={{ header: config.header, fields: config.fields || [] }}  />
               </div>
             );
           case 'scripts':

@@ -278,7 +278,12 @@ const testConfig: TestConfig = {
     },
   ],
   totalTestCases: 18,
-  initScript: ["sudo snap start redis"],
+  dataScript: {
+    init: `sudo snap start redis`,
+    cleanUp: `sudo snap stop redis`,
+    initTimeout: 5,
+    cleanUpTimeout: 5
+  } 
 };
 
 interface TestConfigState {

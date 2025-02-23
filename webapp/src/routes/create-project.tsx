@@ -10,8 +10,10 @@ interface Field {
     placeholder: string;
     width: string | number;
     type: string;
+    path?:string;
     options?: { label: string; value: string }[];
     columns?: { placeholder: string; name: string }[];
+    dataType?: string;
 }
 
 interface ServerConfig {
@@ -31,12 +33,14 @@ const MockserverConfig: ServerConfig[] = [
                 placeholder: "Enter Type",
                 width: 5.3,
                 type: "dropDown",
-                options: [{ label: "Socket Io", value: "socketIo" }, { label: "Web Sockets", value: "socketIo" }]
+                path:"repo",
+                options: [{ label: "Socket Io", value: "yes" }, { label: "Web Sockets", value: "no" }]
             },
             {
                 name: "name",
                 label: "Project Name",
                 width: 5.3,
+                path:"repo",
                 placeholder: "Enter Project Name",
                 type: "textField"
             },
@@ -44,6 +48,7 @@ const MockserverConfig: ServerConfig[] = [
                 name: "description",
                 label: "Project description",
                 width: 5.3,
+                path:"repo",
                 placeholder: "Enter Project description",
                 type: "textField"
             }
@@ -54,17 +59,19 @@ const MockserverConfig: ServerConfig[] = [
         header: "Server configuration",
         fields: [
             {
-                name: "NoOfServers",
+                name: "length",
                 label: "No of websocket servers to start",
                 placeholder: "Enter No of websocket servers to start",
                 width: 5.3,
-                type: "dropDown",
-                options: [{ label: "1", value: "1" }, { label: "2", value: "2" }, { label: "3", value: "3" }, { label: "4", value: "4" }, { label: "5", value: "5" }]
+                path:"servers",
+                dataType:"number",
+                type: "textField",
             },
             {
-                name: "projectPath",
+                name: "path",
                 label: "Project path",
                 width: 5.3,
+                path:"repo",
                 placeholder: "Enter Project path",
                 type: "textField"
             },
@@ -72,6 +79,7 @@ const MockserverConfig: ServerConfig[] = [
                 name: "startCommand",
                 label: "Start command",
                 width: 5.3,
+                path:"repo",
                 placeholder: "Enter Start command",
                 type: "textField"
             },
@@ -108,6 +116,7 @@ const MockserverConfig: ServerConfig[] = [
                 name: "uploadMessages",
                 label: "Upload Messages",
                 placeholder: "Click here to Upload",
+                path:"message.recommendationMessages",
                 width: 5.3,
                 type: "file"
             }
@@ -118,16 +127,18 @@ const MockserverConfig: ServerConfig[] = [
         header: "Message Processors",
         fields: [
             {
-                name: "inboundMessageProcessor",
+                name: "code",
                 label: "Inbound",
                 width: "50%",
+                path:"message.inboundMessageProcessor",
                 placeholder: "const inboundMessageProcessor = (message) => {\n //Process message here\n return message\n}",
                 type: "textField"
             },
             {
-                name: "outboundMessageProcessor",
+                name: "code",
                 label: "Outbound",
                 width: "50%",
+                path:"message.outboundMessageProcessor",
                 placeholder: "const inboundMessageProcessor = (message) => {\n //Process message here\n return message\n}",
                 type: "textField"
             }
@@ -138,16 +149,18 @@ const MockserverConfig: ServerConfig[] = [
         header: "Data scripts",
         fields: [
             {
-                name: "initScript",
+                name: "init",
                 label: "Init",
                 width: "50%",
+                path:"dataScript",
                 placeholder: "sudo snap start redis\ncd ../evenOs && npm run dev\nkafka-server-start.sh",
                 type: "script"
             },
             {
-                name: "cleanUpScript",
+                name: "cleanUp",
                 label: "Cleanup",
                 width: "50%",
+                path:"dataScript",
                 placeholder: "sudo snap start redis\ncd ../evenOs && npm run dev\nkafka-server-start.sh",
                 type: "script"
             }

@@ -7,7 +7,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import EditSquare from '../../assets/editSquare.svg';
 
-const MessageEditBox: React.FC = () => {
+const MessageEditBox: React.FC = ({value}:{value:string[]}) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [selectedTab, setSelectedTab] = useState<number | null>(null);
     const [inputText, setInputText] = useState("");

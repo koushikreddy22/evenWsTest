@@ -2,8 +2,9 @@ import React, { useRef, useState } from "react";
 import { Box, TextField, Typography, Autocomplete, Grid } from "@mui/material";
 import CardHeader from "../common/cardHeader";
 import UploadDialog, { UploadDialogRef } from "../dialog-boxes/upload-dialog-box";
-import { Message } from "@mui/icons-material";
 import MessageEditBox from "../common/messageEditBox";
+import { useTestConfigStore } from "../../store/app-store";
+import { TestConfig } from "../../store/types";
 
 interface ConfigCardProps {
   serverConfig: {
@@ -15,11 +16,37 @@ interface ConfigCardProps {
       options?: { label: string; value: string }[];
       placeholder?: string;
       columns?: { placeholder: string; name: string }[];
+      path: string;
+      name: string;
     }[];
   };
 }
+type NestedObject = Record<string, any>;
 
-const TableComponent = ({ columns }: { columns: { placeholder: string; name: string }[] }) => {
+export function getValueByPath(obj: NestedObject, path: string, lastKey: string): any {
+  if(!lastKey){
+    return ""
+  }
+  if(!path && lastKey){
+    return obj[lastKey]
+  
+  }
+  const keys = path.split('.');
+  let current: any = obj;
+
+  for (const key of keys) {
+    if (current && typeof current === 'object') {
+      current = current[key];
+    } else {
+      return undefined; // Path does not exist
+    }
+  }
+
+  return current ? current[lastKey] : undefined;
+}
+
+
+const TableComponent = ({ columns, list }: { columns: { placeholder: string; name: string }[], list:{server:string, port:string}[] }) => {
   const [rows, setRows] = useState([{ cookieName: "", cookieValue: "" }]);
 
   const handleChange = (index: number, field: string, value: string) => {
@@ -36,7 +63,7 @@ const TableComponent = ({ columns }: { columns: { placeholder: string; name: str
     <Box sx={{ width: "100%", paddingTop: "10px" }}>
       <table style={{ width: "100%", borderCollapse: "collapse", }}>
         <tbody >
-          {rows.map((row, rowIndex) => (
+          {list.map((row, rowIndex) => (
             <tr key={rowIndex}>
               {columns.map((col, colIndex) => (
                 <td key={colIndex} style={{ border: "1px solid #ccc" }}>
@@ -70,6 +97,8 @@ const TableComponent = ({ columns }: { columns: { placeholder: string; name: str
 
 const ConfigCard: React.FC<ConfigCardProps> = ({ serverConfig }) => {
   const { header, fields } = serverConfig;
+  const { testConfig } = useTestConfigStore()
+  console.log(testConfig)
 
   const uploadDialogRef = useRef<UploadDialogRef>(null);
 
@@ -84,9 +113,11 @@ const ConfigCard: React.FC<ConfigCardProps> = ({ serverConfig }) => {
                 {field.label}
               </Typography>
               {(() => {
+                const value = getValueByPath(testConfig, field?.path, field.name)
+                
                 switch (field.type) {
                   case "script":
-                    return <TextField variant="standard" placeholder={field.placeholder} fullWidth multiline minRows={20} sx={{
+                    return <TextField variant="standard" value={value} placeholder={field.placeholder} fullWidth multiline minRows={20} sx={{
                       "& .MuiOutlinedInput-root": {
                         "& fieldset": {
                           border: "none", // Removes the border
@@ -100,6 +131,7 @@ const ConfigCard: React.FC<ConfigCardProps> = ({ serverConfig }) => {
                     return (
                       <Autocomplete
                         options={field.options || []}
+                        value={value}
                         getOptionLabel={(option) => option.label}
                         renderInput={(params) => (
                           <TextField {...params} placeholder={field.label} variant="standard" />
@@ -107,9 +139,11 @@ const ConfigCard: React.FC<ConfigCardProps> = ({ serverConfig }) => {
                       />
                     );
                   case "messageBox":
-                    return <MessageEditBox />
+                    return <MessageEditBox value={value} />
                   case "textField":
-                    return <TextField fullWidth variant="standard" />;
+                    return <TextField fullWidth variant="standard"
+                      value={value}
+                    />;
                   case "file":
                     return (
                       <label
@@ -142,7 +176,7 @@ const ConfigCard: React.FC<ConfigCardProps> = ({ serverConfig }) => {
                       </label>
                     );
                   case "table":
-                    return <TableComponent columns={field.columns || []} />;
+                    return <TableComponent columns={field.columns || []} list ={value} />;
                   default:
                     return null;
                 }
