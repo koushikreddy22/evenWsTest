@@ -1,4 +1,4 @@
-import { useState, forwardRef, useImperativeHandle } from "react";
+import { useState, forwardRef, useImperativeHandle, FC, useEffect } from "react";
 import { Box, Typography,Popover, TextField, Button, IconButton, CircularProgress, List, ListItem, ListItemText } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -9,13 +9,15 @@ export interface AddPackageDialogRef {
     closeDialog: () => void;
 }
 
-const AddPackages = forwardRef<AddPackageDialogRef>((_, ref) => {
+const AddPackages = forwardRef<AddPackageDialogRef>(({value=[], onClickDone}:{value:array[],onClickDone:Function}, ref) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState<string[]>([]);
-    const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
+    const [selectedPackages, setSelectedPackages] = useState<string[]>([...value]);
     const [loading, setLoading] = useState(false);
     const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-
+    useEffect(()=>{
+        setSelectedPackages([...value])
+    },[value,ref])
 
     useImperativeHandle(ref, () => ({
         openDialog: (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget),
@@ -54,6 +56,11 @@ const AddPackages = forwardRef<AddPackageDialogRef>((_, ref) => {
         setSelectedPackages(selectedPackages.filter((p) => p !== pkg));
     };
 
+    const handleSave=()=>{
+        onClickDone(selectedPackages)
+        setAnchorEl(null)
+        setSelectedPackages([])
+    }
 
     return (
             <Popover
@@ -122,7 +129,7 @@ const AddPackages = forwardRef<AddPackageDialogRef>((_, ref) => {
 
             <Box mt={2} sx={{ borderTop: "1px solid #DFE3EB", padding: "10px", display: "flex", justifyContent: "flex-end" }}>
                 <Button color="secondary"onClick={() => setAnchorEl(null)}>Cancel</Button>
-                <Button variant="contained" color="primary">
+                <Button variant="contained" color="primary" onClick={handleSave}>
                     Done
                 </Button>
             </Box>

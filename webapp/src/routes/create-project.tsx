@@ -85,7 +85,7 @@ const MockserverConfig: ServerConfig[] = [
             },
             {
                 name: "servers",
-                label: "Server Name",
+                label: "Server Details",
                 type: "table",
                 width: 5.3,
                 placeholder: "Table data", // Added placeholder to fix TypeScript error
@@ -139,7 +139,7 @@ const MockserverConfig: ServerConfig[] = [
                 label: "Outbound",
                 width: "50%",
                 path:"message.outboundMessageProcessor",
-                placeholder: "const inboundMessageProcessor = (message) => {\n //Process message here\n return message\n}",
+                placeholder: "const outboundMessageProcessor = (message) => {\n //Process message here\n return message\n}",
                 type: "textField"
             }
         ]

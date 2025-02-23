@@ -14,25 +14,20 @@ interface DataScriptsProps {
             width?: number;
             options?: { label: string; value: string }[];
             placeholder?: string;
+            name?:any;
+            path?:any
+            value?:any
         }[];
     };
 
 }
 
+
 const DataScripts: React.FC<DataScriptsProps> = ({ serverConfig }) => {
     const { header, fields } = serverConfig;
     const [timer, setTimer] = useState(0);
-    const { testConfig } = useTestConfigStore()
+    const { testConfig, onFieldChange } = useTestConfigStore()
 
-
-
-    interface OnChangeProps {
-        (value: string): void;
-    }
-
-    const onChange: OnChangeProps = (value) => {
-        console.log(value);
-    }
 
     return (
         <Box sx={{ flexGrow: 1, margin: "15px", border: "1px solid #DFE3EB", borderRadius: "8px" }}>
@@ -41,8 +36,6 @@ const DataScripts: React.FC<DataScriptsProps> = ({ serverConfig }) => {
                 {fields.map((field) => {
                     console.log(field)
                     const value = getValueByPath(testConfig, field.path, field.name)
-                    console.log(value)
-
                     return (
                         <Box sx={{ textAlign: "left", width: field.width || "50%", border: "1px solid #DFE3EB" }}>
                             <Box sx={{ padding: "20px" }}>
@@ -51,8 +44,8 @@ const DataScripts: React.FC<DataScriptsProps> = ({ serverConfig }) => {
                                     fullWidth
                                     variant="standard"
                                     placeholder={field.placeholder}
-                                    value={value}
-                                    onChange={(e) => onChange(e.target.value)}
+                                    defaultValue={value}
+                                    onChange={(e) => onFieldChange(e.target.value,field.path, field.value)}
                                     multiline
                                     rows={20}
                                     sx={{

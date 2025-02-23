@@ -18,18 +18,20 @@ interface ConfigCardProps {
       columns?: { placeholder: string; name: string }[];
       path: string;
       name: string;
+      dataType?:string
     }[];
   };
 }
 type NestedObject = Record<string, any>;
 
 export function getValueByPath(obj: NestedObject, path: string, lastKey: string): any {
-  if(!lastKey){
+  console.log(obj, path, lastKey)
+  if (!lastKey) {
     return ""
   }
-  if(!path && lastKey){
+  if (!path && lastKey) {
     return obj[lastKey]
-  
+
   }
   const keys = path.split('.');
   let current: any = obj;
@@ -46,18 +48,15 @@ export function getValueByPath(obj: NestedObject, path: string, lastKey: string)
 }
 
 
-const TableComponent = ({ columns, list }: { columns: { placeholder: string; name: string }[], list:{server:string, port:string}[] }) => {
-  const [rows, setRows] = useState([{ cookieName: "", cookieValue: "" }]);
+const TableComponent = ({ columns, list }: { columns: { placeholder: string; name: string }[], list: { server: string, port: string }[] }) => {
+  const { onFieldChange } = useTestConfigStore()
 
   const handleChange = (index: number, field: string, value: string) => {
-    const updatedRows = [...rows];
+    const updatedRows = [...list];
     updatedRows[index][field] = value;
-    setRows(updatedRows);
+    onFieldChange(value,"", "servers")
   };
 
-  const handleAddRow = () => {
-    setRows([...rows, { cookieName: "", cookieValue: "" }]);
-  };
 
   return (
     <Box sx={{ width: "100%", paddingTop: "10px" }}>
@@ -97,8 +96,9 @@ const TableComponent = ({ columns, list }: { columns: { placeholder: string; nam
 
 const ConfigCard: React.FC<ConfigCardProps> = ({ serverConfig }) => {
   const { header, fields } = serverConfig;
-  const { testConfig } = useTestConfigStore()
+  const { testConfig,onFieldChange } = useTestConfigStore()
   console.log(testConfig)
+  
 
   const uploadDialogRef = useRef<UploadDialogRef>(null);
 
@@ -114,7 +114,7 @@ const ConfigCard: React.FC<ConfigCardProps> = ({ serverConfig }) => {
               </Typography>
               {(() => {
                 const value = getValueByPath(testConfig, field?.path, field.name)
-                
+
                 switch (field.type) {
                   case "script":
                     return <TextField variant="standard" value={value} placeholder={field.placeholder} fullWidth multiline minRows={20} sx={{
@@ -131,17 +131,19 @@ const ConfigCard: React.FC<ConfigCardProps> = ({ serverConfig }) => {
                     return (
                       <Autocomplete
                         options={field.options || []}
-                        value={value}
                         getOptionLabel={(option) => option.label}
                         renderInput={(params) => (
-                          <TextField {...params} placeholder={field.label} variant="standard" />
+                          <TextField {...params} value={value}
+                            placeholder={field.label} variant="standard" />
                         )}
                       />
                     );
                   case "messageBox":
-                    return <MessageEditBox value={value} />
+                    return <MessageEditBox/>
                   case "textField":
                     return <TextField fullWidth variant="standard"
+                    datatype={field.dataType || "string"}
+                    onChange={(e) => onFieldChange(e.target.value, field.path, field.name)}
                       value={value}
                     />;
                   case "file":
@@ -176,7 +178,7 @@ const ConfigCard: React.FC<ConfigCardProps> = ({ serverConfig }) => {
                       </label>
                     );
                   case "table":
-                    return <TableComponent columns={field.columns || []} list ={value} />;
+                    return <TableComponent columns={field.columns || []} list={value} />;
                   default:
                     return null;
                 }

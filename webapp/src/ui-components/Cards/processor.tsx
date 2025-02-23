@@ -22,7 +22,7 @@ interface MessageProcessorsProps {
 const MessageProcessors: React.FC<MessageProcessorsProps> = ({ serverConfig }) => {
     const { header, fields } = serverConfig;
     const addPackageDialogRef = useRef<AddPackageDialogRef>(null);
-    const { testConfig } = useTestConfigStore()
+    const { testConfig, onFieldChange } = useTestConfigStore()
 
 
     interface OnChangeProps {
@@ -37,24 +37,9 @@ const MessageProcessors: React.FC<MessageProcessorsProps> = ({ serverConfig }) =
         <Box sx={{ flexGrow: 1, margin: "15px", border: "1px solid #DFE3EB", borderRadius: "8px" }}>
             <CardHeader header={header} />
             <Box sx={{ display: "flex" }}>
-                {/* <Box sx={{ textAlign: "left", width: "50%", padding: "20px", border: "1px solid #DFE3EB" }}>
-                    <Typography sx={{ fontWeight: "600" }}>Inbound</Typography>
-                    <TextField
-                        fullWidth
-                        variant="standard"
-                        placeholder="const inboundMessageProcessor = (message) => { //Process message here return message}"
-                        onChange={(e) => onChange(e.target.value)}
-                        multiline
-                        rows={20}
-                        sx={{
-                            "& .MuiInput-underline:before": { borderBottom: "none" },
-                            "& .MuiInput-underline:after": { borderBottom: "none" },
-                            "& .MuiInput-underline:hover:not(.Mui-disabled):before": { borderBottom: "none" },
-                        }}
-                    />
-                </Box> */}
                 {fields.map((field) => {
                     const value = getValueByPath(testConfig,field.path,field.name)
+                    const packages = getValueByPath(testConfig, field.path, "packages")
                     return (
                         <Box sx={{ textAlign: "left", width: field.width || "50%", border: "1px solid #DFE3EB" }}>
                             <Box sx={{ padding: "20px" }}>
@@ -62,9 +47,9 @@ const MessageProcessors: React.FC<MessageProcessorsProps> = ({ serverConfig }) =
                                 <TextField
                                     fullWidth
                                     variant="standard"
-                                    value={value}
+                                    defaultValue={value}
                                     placeholder={field.placeholder}
-                                    onChange={(e) => onChange(e.target.value)}
+                                    onChange={(e) => onFieldChange(e.target.value, field.path, field.name)}
                                     multiline
                                     rows={20}
                                     sx={{
@@ -74,7 +59,7 @@ const MessageProcessors: React.FC<MessageProcessorsProps> = ({ serverConfig }) =
                                     }}
                                 />
                             </Box>
-                            <AddPackages ref={addPackageDialogRef} />
+                            <AddPackages ref={addPackageDialogRef} value={packages} onClickDone ={(data)=>{onFieldChange(data,field.path, "packages")}} />
                             <Box sx={{ padding: "10px", borderTop: "1px solid #DFE3EB", textAlign: "start" }}>
                                 <Button variant="outlined" onClick={(event) => addPackageDialogRef.current?.openDialog(event)}>
                                     Import Packages
@@ -84,33 +69,8 @@ const MessageProcessors: React.FC<MessageProcessorsProps> = ({ serverConfig }) =
                     )
 
                 })}
-                {/* <Box sx={{ textAlign: "left", width: "50%", border: "1px solid #DFE3EB" }}>
-                    <Box sx={{ padding: "20px" }}>
-                        <Typography sx={{ fontWeight: "600" }}>Outbound</Typography>
-                        <TextField
-                            fullWidth
-                            variant="standard"
-                            placeholder="const outboundMessageProcessor = (message) => { //Process message here return message}"
-                            onChange={(e) => onChange(e.target.value)}
-                            multiline
-                            rows={20}
-                            sx={{
-                                "& .MuiInput-underline:before": { borderBottom: "none" },
-                                "& .MuiInput-underline:after": { borderBottom: "none" },
-                                "& .MuiInput-underline:hover:not(.Mui-disabled):before": { borderBottom: "none" },
-                            }}
-                        />
-                    </Box>
-                    <AddPackages ref={addPackageDialogRef} />
-                    <Box sx={{ padding: "10px", borderTop: "1px solid #DFE3EB", textAlign: "start" }}>
-                        <Button variant="outlined" onClick={(event) => addPackageDialogRef.current?.openDialog(event)}>
-                            Import Packages
-                        </Button>
-                    </Box>
-                </Box> */}
             </Box>
 
-            {/* Dialog component is placed outside to ensure it's rendered properly */}
         </Box>
     );
 };
