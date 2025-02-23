@@ -136,10 +136,10 @@ const UploadDialog = forwardRef<UploadDialogRef>((_, ref) => {
           <Typography onClick={onDownload} sx={{ color: "blue", cursor: "pointer" }}>
             Download Template
           </Typography>
-          <Button onClick={() => setAnchorEl(null)} color="secondary">
+          <Button onClick={() => setAnchorEl(null)} color="primary">
             Cancel
           </Button>
-          <Button onClick={handleUpload} variant="contained" color="primary" disabled={!file}>
+          <Button onClick={handleUpload} variant="contained" color="primary" >
             Done
           </Button>
         </Box>
