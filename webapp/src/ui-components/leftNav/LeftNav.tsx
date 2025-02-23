@@ -12,6 +12,7 @@ import AddIcon from '@mui/icons-material/Add';
 import evenIcon from '../../assets/evenLogo.svg';
 import backwardIcon from '../../assets/backwardIcon.svg';
 import { useTestConfigStore } from '../../store/app-store';
+import { v4 as uuidv4 } from "uuid";
 
 
 
@@ -106,6 +107,27 @@ const LeftNav: React.FC<LeftNavProps> = ({ items }) => {
   const handleTextFieldClick = (index: number) => {
     setSelectedTestSuite(index === selectedTestSuiteIndex ? null : index);
   };
+  const handleAddTestSuite = () => {
+    const { testConfig, updateTestConfig, clearTestSuites } = useTestConfigStore.getState();
+    const newTestSuite = {
+      name: `Test Suite ${testConfig.testSuites.length + 1}`,
+      description: "",
+      id: uuidv4(),
+      testCases: [
+        {
+          action: "addUser",
+          testDescription: "",
+          testId: "",
+          userName: "",
+          server: "",
+          consumedBy: [],
+          addUserMessage: {},
+          timeout: 0,
+        },
+      ],
+    };
+    updateTestConfig({ testSuites: [...testConfig.testSuites, newTestSuite] });
+  };
   return (
     <div className="left-nav" style={{ backgroundColor: "#F5F5F566" }}>
       <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: "10px"}}>
@@ -150,7 +172,7 @@ const LeftNav: React.FC<LeftNavProps> = ({ items }) => {
       </Box>
 
       <Box sx={{ display: 'flex' }}>
-        <IconButton>
+        <IconButton onClick={handleAddTestSuite}>
           <AddIcon />
         </IconButton>
         <TextField

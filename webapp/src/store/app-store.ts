@@ -3,7 +3,7 @@ import { TestConfig } from "./types";
 import merge from "lodash/merge";
 import cloneDeep from "lodash/cloneDeep";
 
-const testConfig: TestConfig = {
+export const Template: TestConfig = {
   servers: [],
   repo: {
     name: "",
@@ -93,7 +93,7 @@ interface TestConfigState {
 }
 
 export const useTestConfigStore = create<TestConfigState>((set) => ({
-  testConfig: testConfig,
+  testConfig: JSON.parse(JSON.stringify(Template)),
 
   updateTestConfig: (newConfig) =>
     set((state) => ({
