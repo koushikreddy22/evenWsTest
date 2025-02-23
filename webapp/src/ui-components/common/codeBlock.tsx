@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { Dialog, DialogTitle, DialogContent, IconButton, Box, Typography } from "@mui/material";
 import CloseSharp from "@mui/icons-material/CloseSharp";
 import Editor from "@monaco-editor/react";
 
 const CodeDialog = ({ open, onClose, onChangeValue, value }) => {
   const [jsonData, setJsonData] = useState(value?value:'{\n  "key": "value"\n}');
+  useEffect(() => { 
+    setJsonData(value);
+  }, [value]);
 
   const handleChange = (value) => {
     setJsonData(value);
@@ -12,7 +15,7 @@ const CodeDialog = ({ open, onClose, onChangeValue, value }) => {
 
   const handleSend = () => {
     try {
-      onChangeValue(jsonData)
+      onChangeValue(JSON.parse(jsonData))
      onClose();
     } catch {
       alert("Invalid JSON format");

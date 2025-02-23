@@ -31,6 +31,12 @@ const MessageEditBox: React.FC = ({value, label, index, onChangeValue}:{value:st
         }
         onFieldChange(recommendationMessages[message], "testSuites.0.testCases." + index, "addUserMessage")
     }
+    const onChangeField = (value:string) => {
+        if(label){
+            onChangeValue(value)
+        }
+        onFieldChange(value, "testSuites.0.testCases." + index, "addUserMessage")
+    }
 
     return (
         <Box display="flex" flexDirection="column" gap={1} sx={{ width: "100%", border: "1px solid #DFE3EB", padding: "10px 10px" }}>
@@ -43,7 +49,7 @@ const MessageEditBox: React.FC = ({value, label, index, onChangeValue}:{value:st
                     variant="standard"
                     placeholder="Start a new message..."
                     value={JSON.stringify(value)}
-                    onChange={(e) => onChangeValue(e.target.value)}
+                    onChange={(e) => onChangeField(e.target.value)}
                     InputProps={{ disableUnderline: true }}
                 />
             </Box>
@@ -93,7 +99,7 @@ const MessageEditBox: React.FC = ({value, label, index, onChangeValue}:{value:st
                     <img src={EditSquare} alt="Edit" />
                 </IconButton>
             </Box>
-            <CodeDialog value={JSON.stringify(value)} open={isDialogOpen} onChangeValue={onChangeValue} onClose={()=>{setIsDialogOpen(false)}}/>
+            <CodeDialog value={JSON.stringify(value)} open={isDialogOpen} onChangeValue={onChangeField} onClose={()=>{setIsDialogOpen(false)}}/>
         </Box>
     );
 };

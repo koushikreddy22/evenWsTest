@@ -3,16 +3,41 @@ import { Button, Popover, TextField, IconButton, Box, Typography } from "@mui/ma
 import DoNotDisturbOnIcon from '@mui/icons-material/DoNotDisturbOn';
 import uploadButton from "../../assets/uploadButton.svg";
 import { Close } from "@mui/icons-material";
+import { useTestConfigStore } from "../../store/app-store";
 
 export interface UploadDialogRef {
   openDialog: (event: React.MouseEvent<HTMLElement>) => void;
   closeDialog: () => void;
 }
 
+const template = {
+  student_join: {
+    action: "student_join",
+    id: "SSN111",
+    year: 3,
+    section: "A",
+    department: "CS",
+  },
+  professor_join: { action: "professor_join", id: "SSNProf111" },
+  professor_broadcast: {
+    action: "professor_broadcast",
+    stuDepartment: "CS",
+    stuYear: 3,
+    stuSection: "A",
+    message: "hii this is prof SSNProf111",
+  },
+  student_send: {
+    action: "student_send",
+    profId: "SSNProf111",
+    message: "Hello Prof from SSN222",
+  },
+};
+
 const UploadDialog = forwardRef<UploadDialogRef>((_, ref) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
-
+  const [error, setError] = useState<string | null>(null);
+  const {onFieldChange} = useTestConfigStore()
   useImperativeHandle(ref, () => ({
     openDialog: (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget),
     closeDialog: () => setAnchorEl(null),
@@ -20,7 +45,39 @@ const UploadDialog = forwardRef<UploadDialogRef>((_, ref) => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
-      setFile(event.target.files[0]);
+      const selectedFile = event.target.files[0];
+      if (selectedFile.type === "application/json") {
+        setFile(selectedFile);
+        setError(null);
+      } else {
+        setFile(null);
+        setError("Only JSON files are allowed.");
+      }
+    }
+  };
+
+  const onDownload = () => {
+    const blob = new Blob([JSON.stringify(template, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "template.json";
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+ const handleUpload = () => {
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const jsonData = JSON.parse(event.target?.result as string);
+          onFieldChange(jsonData, "testConfig.message", "recommendationMessages");
+          setAnchorEl(null);
+        } catch (error) {
+          setError("Invalid JSON file.");
+        }
+      };
+      reader.readAsText(file);
     }
   };
 
@@ -51,16 +108,18 @@ const UploadDialog = forwardRef<UploadDialogRef>((_, ref) => {
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <TextField
             fullWidth
+            type="file"
+            inputProps={{ accept: "application/json" }}
             variant="outlined"
             onChange={handleFileChange}
             sx={{
               "& .MuiOutlinedInput-root": {
-                borderRadius: "4px", // Adjusts border radius
+                borderRadius: "4px",
                 height: "34px",
-                fontSize: "14px", // Adjust text size if needed
+                fontSize: "14px",
               },
               "& .MuiOutlinedInput-input": {
-                padding: "8px 14px", // Adjust padding for better alignment
+                padding: "8px 14px",
               },
             }}
           />
@@ -68,15 +127,19 @@ const UploadDialog = forwardRef<UploadDialogRef>((_, ref) => {
             <img src={uploadButton} alt="upload" />
           </IconButton>
         </Box>
-
+        {error && (
+          <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+            {error}
+          </Typography>
+        )}
         <Box mt={2} display="flex" justifyContent="flex-end" alignItems={"center"}>
-          <Typography sx={{color:"blue"}}>
-          Download Template
+          <Typography onClick={onDownload} sx={{ color: "blue", cursor: "pointer" }}>
+            Download Template
           </Typography>
           <Button onClick={() => setAnchorEl(null)} color="secondary">
             Cancel
           </Button>
-          <Button variant="contained" color="primary" disabled={!file}>
+          <Button onClick={handleUpload} variant="contained" color="primary" disabled={!file}>
             Done
           </Button>
         </Box>
