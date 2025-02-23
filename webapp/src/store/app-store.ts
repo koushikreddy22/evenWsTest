@@ -61,7 +61,7 @@ const testConfig: TestConfig = {
       id: "",
       testCases: [
         {
-          action: "",
+          action: "addUser",
           testDescription: "",
           testId: "",
           userName: "",
